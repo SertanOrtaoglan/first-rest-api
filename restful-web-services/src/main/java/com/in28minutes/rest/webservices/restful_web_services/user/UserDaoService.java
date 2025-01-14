@@ -30,7 +30,8 @@ public class UserDaoService {
 	
 	public User findOne(int id) {
 		Predicate<? super User> predicate = user -> user.getId().equals(id);
-		return users.stream().filter(predicate).findFirst().get();
+		//return users.stream().filter(predicate).findFirst().get();         //'findFirst()'den sonra 'get()'i ekledik. Bu kullanım pek uygun değildir çünkü 'get()' methodu 'NoSuchElementException' hatası fırlatabilir. Yani var olmayan bir id değeri ile istek atarsak(örneğin '/users/101' gibi) ekrana 'NoSuchElementException' hatasının fırlatıldığını görürüz.
+		return users.stream().filter(predicate).findFirst().orElse(null);    //Yukarıdaki durumu önlemek için 'findFirst()'den sonra 'get()' değil 'orElse(null)' yazarız. 'orElse()' methodu bir değer mevcutsa değeri döndürür, aksi takdirde tanımladığımız 'other(diğer)' değeri döndürür. Mesela değer mevcut değilse 'null' döndürebiliriz. Bunun için 'orElse(null)' ifadesini yazarız.
 	}
 	
 	

@@ -3,6 +3,7 @@ package com.in28minutes.rest.webservices.restful_web_services.user;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +29,14 @@ public class UserResource {
 	
 	@GetMapping("/users/{id}")
 	public User retrieveUser(@PathVariable int id) {
-		return service.findOne(id);
+		//Değer 'null' olduğunda beyaz bir sayfa almak yerine kendi hata mesajımızı fırlatmak isteriz. Bunun için şu kodu yazarız;
+		User user = service.findOne(id);
+		
+		if(user == null) {
+			throw new UserNotFoundException("id:"+id);  //Kendi yazdığımız bu 'UserNotFoundException'ın "404 Not Found" ile sonuçlanması için oluşturduğumuz 'UserNotFoundException' class'ı içerisine gidip '@ResponseStatus(code = HttpStatus.NOT_FOUND)' annotation'ını eklememiz gerekir.
+		}
+		
+		return user;
 	}
 	
 	@PostMapping("/users")
@@ -44,6 +52,6 @@ public class UserResource {
 	
 	
 	
-
+	
 }
 
