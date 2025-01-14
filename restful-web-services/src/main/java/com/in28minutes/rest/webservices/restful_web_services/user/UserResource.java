@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import jakarta.validation.Valid;
+
 @RestController
 public class UserResource {
 	
@@ -41,7 +43,7 @@ public class UserResource {
 	}
 	
 	@PostMapping("/users")
-	public ResponseEntity<User> createUser(@RequestBody User user) {
+	public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
 		User savedUser = service.save(user);
 		
 		//Genellikle yeni oluşturulan bir kaynağın URL'sini döndürmek istediğimizde(mesela "/users/4"), kullanmamız gereken belirli bir HTTP header'i vardır. Bu header'e(yani başlığa) "location header" denir. Ve aşağıda yazdığımız ResponseEntity içerisinde yer alan 'created()' methodu parametre olarak bir 'URL location' kabul eder.   
