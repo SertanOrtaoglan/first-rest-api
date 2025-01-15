@@ -1,9 +1,12 @@
 package com.in28minutes.rest.webservices.restful_web_services.user;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
 import java.net.URI;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,8 +33,13 @@ public class UserResource {
 		return service.findAll();
 	}
 	
+	//HATEOAS'ın uygulanması 
+	//Yapmak istediğimiz şey 'retrieveUser' methodu içerisine 'retrieveAllUsers' methodunun linkini(/users) yani "http://localhost:8085/users"ı eklemektir.
+	//Verileri ve bağlantıları içeren bir response oluşturabilmek için çok çok önemli birkaç HATEOAS konseptinden yararlanacağız. Bunlar "EntityModel" ve "WebMvcLinkBuilder"dır.
+	//Kullandığımız her bean'in yapısında değişiklik yapmak istemiyoruz bu yüzden "EntityModel"i kullanacağız. Sonuç olarak 'HATEOAS'ı kullanmak ve bağlantılar eklemek istediğimizde yapacağımız ilk şey 'User'ı, 'EntityModel'e sarmak olmalıdır.
+	//Şimdi kod üzerinde düzenlemeleri yapalım;
 	@GetMapping("/users/{id}")
-	public User retrieveUser(@PathVariable int id) {
+	public EntityModel<User> retrieveUser(@PathVariable int id) {
 		//Değer 'null' olduğunda beyaz bir sayfa almak yerine kendi hata mesajımızı fırlatmak isteriz. Bunun için şu kodu yazarız;
 		User user = service.findOne(id);
 		
@@ -39,9 +47,17 @@ public class UserResource {
 			throw new UserNotFoundException("id:"+id);  //Kendi yazdığımız bu 'UserNotFoundException'ın "404 Not Found" ile sonuçlanması için oluşturduğumuz 'UserNotFoundException' class'ı içerisine gidip '@ResponseStatus(code = HttpStatus.NOT_FOUND)' annotation'ını eklememiz gerekir.
 		}
 		
-		return user;
+		EntityModel<User> entityModel = EntityModel.of(user);  //'EntityModel' oluşturma işlemi bu şekilde yapılır. Şimdi bu oluşturduğumuz 'EntityModel'e bağlantı ekleyip döndürmek istiyoruz. Bu işlemi şu şekilde yaparız;
+		
+		WebMvcLinkBuilder link = linkTo(methodOn(this.getClass()).retrieveAllUsers());   //'WebMvcLinkBuilder' class'î içerisinde yer alan 'linkTo()' ve 'methodOn()' static yöntemlerini kullanabilmek için en tepeye 'import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;' ifadesini ekledik.
+		//Sonuç olarak yukarıda yaptığımız şey 'WebMvcLinkBuilder' class'ı içerisinde yer alan 'linkTo()' yöntemini kullanarak controller methoduna işaret eden bir bağlantı(link) oluşturmaktır. İşaret ettiğimiz controller methodu ise bu class'taki 'retrieveAllUsers()' methodu'dur. Bu işlemi de 'methodOn()' yöntemi ile gerçekleştirdik.
+		
+		//Şimdi bağlantıya(linke) sahip olduğumuza göre onu 'EntityModel'e ekleyebiliriz;
+		entityModel.add(link.withRel("all-users"));
+		
+		return entityModel;
 	}
-	
+
 	@PostMapping("/users")
 	public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
 		User savedUser = service.save(user);
