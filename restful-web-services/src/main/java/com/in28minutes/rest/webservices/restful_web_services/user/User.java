@@ -73,6 +73,15 @@ public class User {
 	public String toString() {
 		return "User [id=" + id + ", name=" + name + ", birthDate=" + birthDate + "]";
 	}
+
+	//Belirli bir 'User'ın tüm 'Post'larını almak istiyorsak yukarıda yeni oluşturduğumuz field'ın(private List<Post> posts) getter ve setter'larını oluşturmamız gerekir.
+	public List<Post> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(List<Post> posts) {
+		this.posts = posts;
+	}
 	
 	
 	

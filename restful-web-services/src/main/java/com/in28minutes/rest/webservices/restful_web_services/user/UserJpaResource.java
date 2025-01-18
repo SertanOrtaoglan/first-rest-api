@@ -30,6 +30,7 @@ public class UserJpaResource {
 		this.repository = repository;
 	}
 	
+	
 	@GetMapping("/jpa/users")
 	public List<User> retrieveAllUsers() {
 		return repository.findAll();
@@ -53,7 +54,7 @@ public class UserJpaResource {
 		
 		return entityModel;
 	}
-
+	
 	
 	@PostMapping("/jpa/users")
 	public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
@@ -68,6 +69,20 @@ public class UserJpaResource {
 	@DeleteMapping("/jpa/users/{id}")
 	public void deleteUser(@PathVariable int id) {
 		repository.deleteById(id);
+	}
+	
+	
+	//Belirli bir User'ın tüm Post'larını alma işlemi
+	@GetMapping("/jpa/users/{id}/posts")
+	public List<Post> retrievePostsForUser(@PathVariable int id) {
+		Optional<User> user = repository.findById(id);
+		
+		if(user.isEmpty()) {
+			throw new UserNotFoundException("id:"+id); 
+		}
+		
+		return user.get().getPosts();  //Böylece belirli bir 'User'ın, 'Post'larının listesini(yani tüm 'Post'larını) döndürürüz. 
+		
 	}
 	
 	
