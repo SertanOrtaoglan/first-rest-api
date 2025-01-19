@@ -25,26 +25,26 @@ import jakarta.validation.Valid;
 @RestController
 public class UserJpaResource {
 	
-	private UserRepository repository;
+	private UserRepository userRepository;
 	
 	private PostRepository postRepository;
 
-	public UserJpaResource(UserRepository repository, PostRepository postRepository) {
-		this.repository = repository;
+	public UserJpaResource(UserRepository userRepository, PostRepository postRepository) {
+		this.userRepository = userRepository;
 		this.postRepository = postRepository;
 	}
 	
 	
 	@GetMapping("/jpa/users")
 	public List<User> retrieveAllUsers() {
-		return repository.findAll();
+		return userRepository.findAll();
 	}
 	
 	
 	@GetMapping("/jpa/users/{id}")
 	public EntityModel<User> retrieveUser(@PathVariable int id) {
 		
-		Optional<User> user = repository.findById(id);
+		Optional<User> user = userRepository.findById(id);
 		
 		if(user.isEmpty()) {
 			throw new UserNotFoundException("id:"+id); 
@@ -62,9 +62,9 @@ public class UserJpaResource {
 	
 	@PostMapping("/jpa/users")
 	public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-		User savedUser = repository.save(user);
+		User savedUser = userRepository.save(user);
 		  
-		//URI location -> /jap/users/4   [Buradaki "/users" zaten mevcut kullandığımız URI'dır. Sadece sonuna 'id' ekleyeceğiz. Sonuç olarak "/jpa/users/{id}" olması gerekir. Buradaki 'id' değerini ise 'user.getId()' ile değiştireceğiz. 
+		//URI location -> /jpa/users/4   [Buradaki "/users" zaten mevcut kullandığımız URI'dır. Sadece sonuna 'id' ekleyeceğiz. Sonuç olarak "/jpa/users/{id}" olması gerekir. Buradaki 'id' değerini ise 'user.getId()' ile değiştireceğiz. 
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedUser.getId()).toUri();
 		return ResponseEntity.created(location).build();
 	}
@@ -72,14 +72,14 @@ public class UserJpaResource {
 	
 	@DeleteMapping("/jpa/users/{id}")
 	public void deleteUser(@PathVariable int id) {
-		repository.deleteById(id);
+		userRepository.deleteById(id);
 	}
 	
 	
 	//Belirli bir User'ın tüm Post'larını alma işlemi
 	@GetMapping("/jpa/users/{id}/posts")
 	public List<Post> retrievePostsForUser(@PathVariable int id) {
-		Optional<User> user = repository.findById(id);
+		Optional<User> user = userRepository.findById(id);
 		
 		if(user.isEmpty()) {
 			throw new UserNotFoundException("id:"+id); 
@@ -93,13 +93,13 @@ public class UserJpaResource {
 	//Belirli bir User için yeni bir 'Post' oluşturma işlemi
 	@PostMapping("/jpa/users/{id}/posts")
 	public ResponseEntity<Object> createPostForUser(@PathVariable int id, @Valid @RequestBody Post post) {
-		Optional<User> user = repository.findById(id);
+		Optional<User> user = userRepository.findById(id);
 		
 		if(user.isEmpty()) {
 			throw new UserNotFoundException("id:"+id); 
 		}
 		
-		post.setUser(user.get());   //Böylece path'den id'si girilen 'user'ı buluyoruz ve ardından o 'user'ı, 'Post'un içine set ediyoruz.
+		post.setUser(user.get());   //Böylece path'den id'si girilen 'user'ı buluyoruz ve ardından o 'user'ı, 'Post'un içindeki 'user'a set ediyoruz.
 		
 		Post savedPost = postRepository.save(post);   //Daha sonra RequestBody'den girilen 'post'u, 'postRepository'ye kaydediyoruz.
 		
